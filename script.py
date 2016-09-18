@@ -39,6 +39,14 @@ for row in range(0,height):
 				index=i
 		distanceGrid[row,col]=index
 
+outFileName='./Desktop/PyQGIS_Tests/Weighted Voronoi/rasterVoronoi.tiff'
+driver=gdal.GetDriverByName('GTiff')
+output=driver.Create(outFileName, height, width, 1, gdal.GDT_Byte)
+output.SetGeoTransform(dataset.GetGeoTransform())
+output.SetProjection(dataset.GetProjection())
+output.GetRasterBand(1).WriteArray(distanceGrid)
+rasterVoronoi=QgsRasterLayer('./Desktop/PyQGIS_Tests/Weighted Voronoi/rasterVoronoi.tiff')
+QgsMapLayerRegistry.instance().addMapLayer(rasterVoronoi)
 #distanceGrids.append(distanceGrid)
 
 
