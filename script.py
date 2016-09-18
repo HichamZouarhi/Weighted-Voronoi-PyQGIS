@@ -25,13 +25,13 @@ for row in range(0,height):
 
 
 
-print "compute the distance grid for each point"
+print "compute the weighted distance grid for each point"
 distanceGrids=[]
 for i in range(0, (len(points)-1)):
 	distanceGrid=np.zeros(shape=(height, width))
 	for row in range(0,height):
 		for col in range(0,width):
-			distanceGrid[row,col]=math.sqrt((row-points[i][0])**2+(col-points[i][1])**2)
+			distanceGrid[row,col]=math.sqrt((row-points[i][0])**2+(col-points[i][1])**2)*points[i][2]
 	distanceGrids.append(distanceGrid)
 
 
