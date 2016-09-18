@@ -27,12 +27,19 @@ for row in range(0,height):
 
 print "compute the weighted distance grid for each point"
 distanceGrids=[]
-for i in range(0, (len(points)-1)):
-	distanceGrid=np.zeros(shape=(height, width))
-	for row in range(0,height):
-		for col in range(0,width):
-			distanceGrid[row,col]=math.sqrt((row-points[i][0])**2+(col-points[i][1])**2)*points[i][2]
-	distanceGrids.append(distanceGrid)
+distanceGrid=np.zeros(shape=(height, width))
+for row in range(0,height):
+	for col in range(0,width):
+		index=0
+		min=math.sqrt((row-points[0][0])**2+(col-points[0][1])**2)/points[0][2]
+		for i in range(1, (len(points)-1)):
+			weightedDistance=math.sqrt((row-points[i][0])**2+(col-points[i][1])**2)/points[i][2]
+			if(weightedDistance<min):
+				min=weightedDistance
+				index=i
+		distanceGrid[row,col]=index
+
+#distanceGrids.append(distanceGrid)
 
 
 #print "all cells with a weighted value"
