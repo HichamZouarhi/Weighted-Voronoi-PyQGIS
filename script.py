@@ -4,18 +4,19 @@ import math
 import numpy as np
 import os
 
+
 #Get the points vector layer
-pointsVector=QgsVectorLayer('./Desktop/PyQGIS_Tests/Weighted Voronoi/points.shp', 'points', 'ogr')
+pointsVector=QgsVectorLayer(sys.argv+'points.shp', 'points', 'ogr')
 #Add the vector layer to the map layer registry
 QgsMapLayerRegistry.instance().addMapLayer(pointsVector)
 
-os.system('gdal_rasterize -a z -ts 1000 1000 -l points "/home/user/Desktop/PyQGIS_Tests/Weighted Voronoi/points.shp" "/home/user/Desktop/PyQGIS_Tests/Weighted Voronoi/rasterPoints"')
+os.system('gdal_rasterize -a z -ts 1000 1000 -l points "'+sys.argv+'/points.shp" "'+sys.argv+'/rasterPoints"')
 
 
-rasterPoints=QgsRasterLayer('./Desktop/PyQGIS_Tests/Weighted Voronoi/rasterPoints', 'rasterPoints')
-QgsMapLayerRegistry.instance().addMapLayer(rasterPoints)
+#rasterPoints=QgsRasterLayer(sys.argv'/rasterPoints', 'rasterPoints')
+#QgsMapLayerRegistry.instance().addMapLayer(rasterPoints)
 
-dataset=gdal.Open('./Desktop/PyQGIS_Tests/Weighted Voronoi/rasterPoints')
+dataset=gdal.Open(sys.argv+'/rasterPoints')
 numpy_array=dataset.ReadAsArray()
 
 width,height=numpy_array.shape
@@ -45,9 +46,9 @@ for row in range(0,height):
 				index=i
 		distanceGrid[row,col]=index
 
-#save the distance grd as an output raster
+#save the distance grid as an output raster
 #output file name ( path to where to save the raster file )
-outFileName='./Desktop/PyQGIS_Tests/Weighted Voronoi/rasterVoronoi.tiff'
+outFileName=sys.argv+'/rasterVoronoi.tiff'
 #call the driver for the chosen format from GDAL
 driver=gdal.GetDriverByName('GTiff')
 #Create the file with dimensions of the input raster ( rasterized points )
@@ -59,14 +60,14 @@ output.SetProjection(dataset.GetProjection())
 #insert data to the resulting raster in band 1 from the weighted distance grid
 output.GetRasterBand(1).WriteArray(distanceGrid)
 #Call the raster output file
-rasterVoronoi=QgsRasterLayer('./Desktop/PyQGIS_Tests/Weighted Voronoi/rasterVoronoi.tiff', 'weighted Raster')
+rasterVoronoi=QgsRasterLayer(sys.argv+'/rasterVoronoi.tiff', 'weighted Raster')
 #Add it to the map layer registry ( display it on the map)
 QgsMapLayerRegistry.instance().addMapLayer(rasterVoronoi)
 
 #polygonize the result raster
-os.system('gdal_polygonize.py "/home/user/Desktop/PyQGIS_Tests/Weighted Voronoi/rasterVoronoi.tiff" -f "ESRI Shapefile" "/home/user/Desktop/PyQGIS_Tests/Weighted Voronoi/shp/WeightedVoronoi/WeightedVoronoi.shp" WeightedVoronoi')
+os.system('gdal_polygonize.py "'+sys.argv+'/rasterVoronoi.tiff" -f "ESRI Shapefile" "'+sys.argv+'/WeightedVoronoi.shp" WeightedVoronoi')
 
-weightedVoronoiVector=QgsVectorLayer('./Desktop/PyQGIS_Tests/Weighted Voronoi/shp/WeightedVoronoi/WeightedVoronoi.shp', 'weighted voronoi', 'ogr')
+weightedVoronoiVector=QgsVectorLayer(sys.argv+'/WeightedVoronoi.shp', 'weighted voronoi', 'ogr')
 #load the vector weighted voronoi diagram
 QgsMapLayerRegistry.instance().addMapLayer(weightedVoronoiVector)
 # #print "all cells with a weighted value"
