@@ -23,3 +23,4 @@ and returns a weighted voronoi diagram using pyQGIS
       sys.argv="Path/to/your/vector/layer"
       execfile("Path/to/this/script.py")
     
+NB: the input vector file must be an ESRI shapefile
