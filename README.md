@@ -22,5 +22,11 @@ and returns a weighted voronoi diagram using pyQGIS
       import sys
       sys.argv="Path/to/your/vector/layer"
       execfile("Path/to/this/script.py")
+  
+  for QGIS 3 using python 3 use this instead:
+  
+      import sys
+      sys.argv="Path/to/your/vector/layer"
+      exec(open("Path/to/this/script_python3.py").read())
     
 NB: the input vector file must be an ESRI shapefile

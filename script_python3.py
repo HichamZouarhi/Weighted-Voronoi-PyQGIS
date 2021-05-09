@@ -4,7 +4,6 @@ import math
 import numpy as np
 import os
 
-
 MARGIN = 0.01
 
 def weightedFunction(x, y, x0, y0, weight):
@@ -14,7 +13,7 @@ def weightedFunction(x, y, x0, y0, weight):
 #Get the points vector layer
 pointsVector = QgsVectorLayer(sys.argv, 'points', 'ogr')
 #Add the vector layer to the map layer registry
-QgsMapLayerRegistry.instance().addMapLayer(pointsVector)
+QgsProject.instance().addMapLayer(pointsVector)
 
 #get layer extents with a small margin to avoid ignoring points on bounding box's limit
 bounding_box = pointsVector.extent()
@@ -26,8 +25,8 @@ extent_args = "-te " + str(bounding_box.xMinimum() - MARGIN) \
 os.system('gdal_rasterize -a z -ts 1000 1000 ' + extent_args + ' -l points "' + sys.argv + '" "./rasterPoints"')
 
 
-#rasterPoints=QgsRasterLayer('./rasterPoints', 'rasterPoints')
-#QgsMapLayerRegistry.instance().addMapLayer(rasterPoints)
+rasterPoints=QgsRasterLayer('./rasterPoints', 'rasterPoints')
+QgsProject.instance().addMapLayer(rasterPoints)
 
 dataset = gdal.Open('./rasterPoints')
 numpy_array = dataset.ReadAsArray()
@@ -36,16 +35,14 @@ width, height = numpy_array.shape
 points = []
 
 #get all the weighted points from the raster
-print "get the points with their weights from raster"
+print("get the points with their weights from raster")
 for row in range(height):
 	for col in range(width):
-		if(numpy_array[row,col] != 0):
-			print numpy_array[row, col]
+		if(numpy_array[row, col] != 0):
+			print(str(numpy_array[row, col]) + " at point : " + str(row) + " , " + str(col))
 			points.append([row, col, numpy_array[row,col]])
 
-
-
-# print "compute the weighted distance grid for each point"
+print("compute the weighted distance grid for each point")
 
 distanceGrid = np.zeros(shape = (height, width))
 for row in range(height):
@@ -54,13 +51,14 @@ for row in range(height):
 		min_distance = weightedFunction(row, col, points[0][0], points[0][1], points[0][2])
 		for i in range(1, (len(points))):
 			weightedDistance = weightedFunction(row, col, points[i][0], points[i][1], points[i][2])
-			if(weightedDistance < min):
-				min = weightedDistance
+			if(weightedDistance < min_distance):
+				min_distance = weightedDistance
 				index = i
 		distanceGrid[row, col] = index
 
 #save the distance grid as an output raster
 #output file name ( path to where to save the raster file )
+print("save distance grid as raster GTiff")
 outFileName = './rasterVoronoi.tiff'
 #call the driver for the chosen format from GDAL
 driver = gdal.GetDriverByName('GTiff')
@@ -75,12 +73,12 @@ output.GetRasterBand(1).WriteArray(distanceGrid)
 #Call the raster output file
 rasterVoronoi = QgsRasterLayer('./rasterVoronoi.tiff', 'weighted Raster')
 #Add it to the map layer registry ( display it on the map)
-QgsMapLayerRegistry.instance().addMapLayer(rasterVoronoi)
+QgsProject.instance().addMapLayer(rasterVoronoi)
 
 #polygonize the result raster
-os.system('gdal_polygonize.py "./rasterVoronoi.tiff" -f "ESRI Shapefile" "./WeightedVoronoi.shp" WeightedVoronoi')
-
+print("convert raster to shapefile")
+os.system('gdal_polygonize.bat ./rasterVoronoi.tiff ./WeightedVoronoi.shp -b 1 -f "ESRI Shapefile" weighted')
 weightedVoronoiVector = QgsVectorLayer('./WeightedVoronoi.shp', 'weighted voronoi', 'ogr')
 #load the vector weighted voronoi diagram
-QgsMapLayerRegistry.instance().addMapLayer(weightedVoronoiVector)
-# #print "all cells with a weighted value"
+QgsProject.instance().addMapLayer(weightedVoronoiVector)
+print("End of script")
